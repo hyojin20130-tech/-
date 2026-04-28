@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파생상품 용어 퀴즈 이벤트</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C; --gold-light: #F0D080; --gold-dark: #8B6914;
+    --navy: #0A0F2C; --navy-mid: #111836; --navy-light: #1A2550;
+    --silver: #A8B4C8; --white: #F5F7FF; --red: #E53E3E; --green: #2ECC71;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--navy); color:var(--white); min-height:100vh; overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(201,168,76,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.04) 1px,transparent 1px); background-size:40px 40px; pointer-events:none; z-index:0; }
+  .orb { position:fixed; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:0; animation:orbFloat 8s ease-in-out infinite alternate; }
+  .orb-1 { width:400px; height:400px; background:rgba(201,168,76,0.12); top:-100px; right:-100px; }
+  .orb-2 { width:300px; height:300px; background:rgba(26,37,80,0.8); bottom:-50px; left:-80px; animation-delay:-3s; }
+  @keyframes orbFloat { from{transform:translate(0,0) scale(1);} to{transform:translate(20px,-20px) scale(1.1);} }
+  .container { position:relative; z-index:1; max-width:700px; margin:0 auto; padding:24px 20px 60px; }
+  .event-badge { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,var(--gold-dark),var(--gold)); color:var(--navy); font-size:11px; font-weight:700; letter-spacing:2px; padding:6px 16px; border-radius:20px; margin-bottom:20px; animation:fadeDown 0.6s ease both; }
+  .event-badge::before { content:'★'; font-size:10px; }
+  .hero { text-align:center; padding:20px 0 32px; animation:fadeDown 0.7s ease 0.1s both; }
+  .hero-title { font-family:'Black Han Sans',sans-serif; font-size:clamp(28px,7vw,44px); line-height:1.15; background:linear-gradient(135deg,var(--gold-light) 0%,var(--gold) 50%,var(--gold-dark) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:12px; }
+  .hero-sub { color:var(--silver); font-size:14px; line-height:1.6; }
+  .prize-bar { display:flex; gap:12px; margin:24px 0 32px; animation:fadeUp 0.7s ease 0.2s both; justify-content:center; }
+  .prize-card { background:linear-gradient(135deg,rgba(201,168,76,0.12),rgba(201,168,76,0.04)); border:1px solid rgba(201,168,76,0.25); border-radius:14px; padding:22px 28px; text-align:center; min-width:260px; position:relative; overflow:hidden; }
+  .prize-card::before { content:'☕'; position:absolute; top:-18px; right:-18px; font-size:72px; opacity:0.08; pointer-events:none; }
+  .prize-rank { font-size:12px; font-weight:700; letter-spacing:1.5px; color:var(--gold); margin-bottom:10px; }
+  .prize-amount { font-family:'Black Han Sans',sans-serif; font-size:26px; color:var(--gold-light); margin-bottom:6px; }
+  .prize-label { font-size:12px; color:var(--silver); line-height:1.7; }
+
+  /* Counter badge */
+  .counter-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(229,62,62,0.12); border:1px solid rgba(229,62,62,0.3); border-radius:50px; padding:8px 18px; font-size:13px; color:#FC8181; margin-bottom:24px; animation:fadeUp 0.7s ease 0.15s both; }
+  .counter-num { font-family:'Black Han Sans',sans-serif; font-size:20px; color:var(--red); }
+  .counter-remain { font-size:11px; color:var(--silver); margin-left:4px; }
+
+  .quiz-section { animation:fadeUp 0.7s ease 0.3s both; }
+  .section-label { font-size:11px; font-weight:700; letter-spacing:2px; color:var(--gold); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+  .section-label::after { content:''; flex:1; height:1px; background:linear-gradient(to right,rgba(201,168,76,0.4),transparent); }
+  .quiz-card { background:var(--navy-mid); border:1px solid rgba(201,168,76,0.2); border-radius:20px; padding:28px 24px; margin-bottom:16px; position:relative; overflow:hidden; }
+  .quiz-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:0; transition:opacity 0.3s; }
+  .quiz-card.answered::before { opacity:1; }
+  .quiz-num { font-size:11px; font-weight:700; letter-spacing:2px; color:var(--gold-dark); margin-bottom:10px; }
+  .quiz-q { font-size:17px; font-weight:500; line-height:1.5; margin-bottom:22px; color:var(--white); }
+  .quiz-term { color:var(--gold-light); font-weight:700; }
+  .options { display:flex; flex-direction:column; gap:10px; }
+  .option { display:flex; align-items:center; gap:14px; padding:14px 18px; background:rgba(255,255,255,0.03); border:1px solid rgba(168,180,200,0.15); border-radius:12px; cursor:pointer; transition:all 0.2s ease; font-size:14px; color:var(--silver); user-select:none; -webkit-tap-highlight-color:transparent; }
+  .option:hover:not(.disabled) { background:rgba(201,168,76,0.08); border-color:rgba(201,168,76,0.3); color:var(--white); }
+  .option.selected-correct { background:rgba(46,204,113,0.12); border-color:rgba(46,204,113,0.5); color:#2ECC71; }
+  .option.selected-wrong { background:rgba(229,62,62,0.12); border-color:rgba(229,62,62,0.5); color:var(--red); }
+  .option.reveal-correct { background:rgba(46,204,113,0.06); border-color:rgba(46,204,113,0.3); color:rgba(46,204,113,0.7); }
+  .option.disabled { cursor:default; pointer-events:none; }
+  .opt-letter { width:28px; height:28px; border-radius:8px; background:rgba(201,168,76,0.15); color:var(--gold); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s; }
+  .option.selected-correct .opt-letter { background:rgba(46,204,113,0.3); color:#2ECC71; }
+  .option.selected-wrong .opt-letter { background:rgba(229,62,62,0.3); color:var(--red); }
+  .option.reveal-correct .opt-letter { background:rgba(46,204,113,0.2); color:rgba(46,204,113,0.8); }
+  .feedback { margin-top:16px; padding:14px 18px; border-radius:12px; font-size:13px; line-height:1.5; display:none; animation:fadeUp 0.3s ease; }
+  .feedback.correct { background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.25); color:#2ECC71; display:block; }
+  .feedback.wrong { background:rgba(229,62,62,0.1); border:1px solid rgba(229,62,62,0.25); color:#FC8181; display:block; }
+  .progress-wrap { margin:0 0 28px; animation:fadeUp 0.7s ease 0.25s both; }
+  .progress-info { display:flex; justify-content:space-between; font-size:12px; color:var(--silver); margin-bottom:8px; }
+  .progress-bar { height:6px; background:rgba(255,255,255,0.07); border-radius:3px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--gold-dark),var(--gold-light)); border-radius:3px; transition:width 0.5s cubic-bezier(0.4,0,0.2,1); }
+  .entry-section { margin-top:28px; background:var(--navy-mid); border:1px solid rgba(201,168,76,0.2); border-radius:20px; padding:28px 24px; animation:fadeUp 0.7s ease 0.5s both; }
+  .entry-section h3 { font-family:'Black Han Sans',sans-serif; font-size:18px; color:var(--gold-light); margin-bottom:6px; }
+  .entry-section p { font-size:13px; color:var(--silver); margin-bottom:20px; line-height:1.5; }
+  .form-row { display:flex; flex-direction:column; gap:12px; margin-bottom:16px; }
+  .form-group { display:flex; flex-direction:column; gap:6px; }
+  .form-group label { font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--gold); }
+  .form-input { background:rgba(255,255,255,0.05); border:1px solid rgba(168,180,200,0.2); border-radius:10px; padding:13px 16px; color:var(--white); font-size:14px; font-family:'Noto Sans KR',sans-serif; outline:none; transition:border-color 0.2s; width:100%; }
+  .form-input:focus { border-color:rgba(201,168,76,0.5); }
+  .form-input::placeholder { color:rgba(168,180,200,0.4); }
+  .agree-row { display:flex; align-items:flex-start; gap:10px; margin-bottom:20px; cursor:pointer; }
+  .agree-row input[type="checkbox"] { display:none; }
+  .custom-check { width:20px; height:20px; border:1.5px solid rgba(201,168,76,0.35); border-radius:5px; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+  .agree-row input:checked + .custom-check { background:var(--gold); border-color:var(--gold); }
+  .agree-row input:checked + .custom-check::after { content:'✓'; font-size:12px; color:var(--navy); font-weight:700; }
+  .agree-text { font-size:12px; color:var(--silver); line-height:1.5; }
+  .score-notice { text-align:center; font-size:12px; color:var(--silver); margin-bottom:16px; padding:10px 16px; background:rgba(201,168,76,0.06); border-radius:8px; border:1px solid rgba(201,168,76,0.15); }
+  .btn-submit { width:100%; padding:18px; background:linear-gradient(135deg,var(--gold-dark) 0%,var(--gold) 50%,var(--gold-light) 100%); border:none; border-radius:14px; color:var(--navy); font-family:'Black Han Sans',sans-serif; font-size:17px; letter-spacing:1px; cursor:pointer; position:relative; overflow:hidden; transition:all 0.2s; box-shadow:0 4px 20px rgba(201,168,76,0.25); }
+  .btn-submit::after { content:''; position:absolute; top:0; left:-100%; width:60%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent); transform:skewX(-20deg); transition:left 0.5s; }
+  .btn-submit:hover::after { left:160%; }
+  .btn-submit:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(201,168,76,0.35); }
+  .btn-submit:active { transform:translateY(0); }
+  .btn-submit:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+  .success-screen { display:none; text-align:center; padding:40px 20px; animation:fadeUp 0.5s ease; }
+  .success-icon { font-size:64px; margin-bottom:20px; display:block; animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.2s both; }
+  .success-title { font-family:'Black Han Sans',sans-serif; font-size:28px; background:linear-gradient(135deg,var(--gold-light),var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:12px; }
+  .success-desc { font-size:14px; color:var(--silver); line-height:1.7; margin-bottom:28px; }
+  .result-badge { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05)); border:1px solid rgba(201,168,76,0.3); border-radius:50px; padding:12px 24px; font-size:16px; color:var(--gold-light); margin-bottom:24px; }
+  .info-strip { display:flex; gap:10px; margin-top:28px; animation:fadeUp 0.7s ease 0.6s both; }
+  .info-item { flex:1; text-align:center; padding:14px 8px; background:rgba(255,255,255,0.03); border:1px solid rgba(168,180,200,0.1); border-radius:12px; }
+  .info-item .icon { font-size:20px; margin-bottom:6px; display:block; }
+  .info-item .label { font-size:10px; letter-spacing:1px; color:var(--silver); margin-bottom:3px; }
+  .info-item .val { font-size:13px; font-weight:700; color:var(--white); }
+  .closed-screen { display:none; text-align:center; padding:60px 20px; }
+  .closed-screen .icon { font-size:56px; margin-bottom:16px; display:block; }
+  .closed-screen h2 { font-family:'Black Han Sans',sans-serif; font-size:24px; color:var(--red); margin-bottom:12px; }
+  .closed-screen p { color:var(--silver); font-size:14px; line-height:1.7; }
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-16px);} to{opacity:1;transform:translateY(0);} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+  @keyframes popIn { from{opacity:0;transform:scale(0.4);} to{opacity:1;transform:scale(1);} }
+</style>
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="container">
+  <div style="text-align:center; animation:fadeDown 0.5s ease both;">
+    <span class="event-badge">2026 SPECIAL EVENT</span>
+  </div>
+
+  <div class="hero">
+    <div class="hero-title">파생상품 용어<br>퀴즈 챌린지</div>
+    <p class="hero-sub">3문제를 모두 맞히면 스타벅스 기프트콘(1만원)을 드려요!<br>선착순 100명 한정 · 퀴즈 완료 후 응모하기 버튼을 눌러 참여를 완료하세요.</p>
+  </div>
+
+  <!-- 선착순 카운터 -->
+  <div style="text-align:center;">
+    <div class="counter-badge" id="counterBadge">
+      🔥 현재 응모 <span class="counter-num" id="entryCount">0</span>명 /
+      <span style="color:var(--gold); font-weight:700;">100명</span>
+      <span class="counter-remain" id="remainText">(잔여 100명)</span>
+    </div>
+  </div>
+
+  <div class="prize-bar">
+    <div class="prize-card">
+      <div class="prize-rank">🎁 참여 혜택</div>
+      <div class="prize-amount">스타벅스 기프트콘</div>
+      <div style="font-size:22px;font-family:'Black Han Sans',sans-serif;color:var(--gold-light);margin-bottom:8px;">10,000원</div>
+      <div class="prize-label">3문제 전체 정답 시 지급<br><span style="color:var(--gold);font-weight:700;">선착순 100명</span> 한정</div>
+    </div>
+  </div>
+
+  <!-- 마감 안내 (선착순 초과 시) -->
+  <div class="closed-screen" id="closedScreen">
+    <span class="icon">😢</span>
+    <h2>선착순 마감되었습니다</h2>
+    <p>아쉽게도 선착순 100명이 모두 응모 완료되었습니다.<br>다음 이벤트에서 꼭 만나요!</p>
+  </div>
+
+  <!-- 메인 콘텐츠 -->
+  <div id="mainContent">
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="progressText">진행 0 / 3 문제</span>
+        <span id="scoreText">정답: 0 / 3</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+
+    <div class="quiz-section" id="quizSection">
+      <div class="section-label">QUIZ</div>
+
+      <div class="quiz-card" id="card-0">
+        <div class="quiz-num">Q 01</div>
+        <div class="quiz-q"><span class="quiz-term">콜 옵션(Call Option)</span>에 대한 설명으로 가장 올바른 것은?</div>
+        <div class="options" data-q="0" data-answer="1">
+          <div class="option" data-idx="0" onclick="selectAnswer(this)"><span class="opt-letter">A</span><span>기초자산을 미래에 정해진 가격으로 매도할 수 있는 권리</span></div>
+          <div class="option" data-idx="1" onclick="selectAnswer(this)"><span class="opt-letter">B</span><span>기초자산을 미래에 정해진 가격으로 매수할 수 있는 권리</span></div>
+          <div class="option" data-idx="2" onclick="selectAnswer(this)"><span class="opt-letter">C</span><span>기초자산 가격 하락 시 이익이 발생하는 파생상품</span></div>
+          <div class="option" data-idx="3" onclick="selectAnswer(this)"><span class="opt-letter">D</span><span>두 당사자 간 미래 자산 교환을 약속하는 계약</span></div>
+        </div>
+        <div class="feedback" id="fb-0"></div>
+      </div>
+
+      <div class="quiz-card" id="card-1">
+        <div class="quiz-num">Q 02</div>
+        <div class="quiz-q"><span class="quiz-term">마진콜(Margin Call)</span>이 발생하는 상황은?</div>
+        <div class="options" data-q="1" data-answer="2">
+          <div class="option" data-idx="0" onclick="selectAnswer(this)"><span class="opt-letter">A</span><span>포지션에서 충분한 이익이 발생했을 때</span></div>
+          <div class="option" data-idx="1" onclick="selectAnswer(this)"><span class="opt-letter">B</span><span>거래소의 정기 점검 시간에 자동으로 발생</span></div>
+          <div class="option" data-idx="2" onclick="selectAnswer(this)"><span class="opt-letter">C</span><span>계좌의 증거금이 유지증거금 수준 아래로 하락했을 때</span></div>
+          <div class="option" data-idx="3" onclick="selectAnswer(this)"><span class="opt-letter">D</span><span>옵션 만기일이 도래했을 때 브로커가 연락하는 것</span></div>
+        </div>
+        <div class="feedback" id="fb-1"></div>
+      </div>
+
+      <div class="quiz-card" id="card-2">
+        <div class="quiz-num">Q 03</div>
+        <div class="quiz-q">한국을 대표하는 <span class="quiz-term">주가지수 파생상품</span>의 기초자산으로 사용되는 지수는 무엇일까요?</div>
+        <div class="options" data-q="2" data-answer="1">
+          <div class="option" data-idx="0" onclick="selectAnswer(this)"><span class="opt-letter">A</span><span>KOSDAQ 150</span></div>
+          <div class="option" data-idx="1" onclick="selectAnswer(this)"><span class="opt-letter">B</span><span>KOSPI 200</span></div>
+          <div class="option" data-idx="2" onclick="selectAnswer(this)"><span class="opt-letter">C</span><span>KRX 300</span></div>
+          <div class="option" data-idx="3" onclick="selectAnswer(this)"><span class="opt-letter">D</span><span>코스피 종합지수</span></div>
+        </div>
+        <div class="feedback" id="fb-2"></div>
+      </div>
+    </div>
+
+    <div class="entry-section" id="entrySection">
+      <h3>📋 응모 정보 입력</h3>
+      <p>3문제 전체 정답자에 한해 선착순 100명께 스타벅스 기프트콘(1만원)을 드립니다.<br>아래 정보를 입력하고 응모하기 버튼을 눌러주세요.</p>
+      <div id="scoreNotice" class="score-notice" style="display:none;">
+        ✅ 퀴즈 완료! <strong id="finalScore">0</strong>점 획득하셨습니다.<br>
+        <span id="perfectMsg" style="display:none;color:var(--gold);">🎉 3문제 모두 정답! 지금 바로 응모하세요.</span>
+        <span id="failMsg" style="display:none;color:#FC8181;">아쉽게도 상품 지급 대상은 3문제 전체 정답자입니다.</span>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>이름</label><input class="form-input" id="inp-name" type="text" placeholder="홍길동"></div>
+        <div class="form-group"><label>연락처</label><input class="form-input" id="inp-phone" type="tel" placeholder="010-0000-0000"></div>
+        <div class="form-group"><label>이메일</label><input class="form-input" id="inp-email" type="email" placeholder="example@email.com"></div>
+      </div>
+      <label class="agree-row">
+        <input type="checkbox" id="agree">
+        <span class="custom-check"></span>
+        <span class="agree-text">개인정보 수집 및 이용에 동의합니다. 수집된 정보는 당첨자 확인 및 경품 발송 목적으로만 활용됩니다.</span>
+      </label>
+      <button class="btn-submit" id="submitBtn" onclick="submitEntry()">🎯 응모하기</button>
+    </div>
+
+    <div class="info-strip">
+      <div class="info-item"><span class="icon">📅</span><div class="label">이벤트 기간</div><div class="val">6.1 ~ 6.12</div></div>
+      <div class="info-item"><span class="icon">🎁</span><div class="label">당첨 발표</div><div class="val">2026.06.16</div></div>
+      <div class="info-item"><span class="icon">👤</span><div class="label">참여 대상</div><div class="val">전 고객</div></div>
+    </div>
+  </div>
+
+  <div class="success-screen" id="successScreen">
+    <span class="success-icon">☕</span>
+    <div class="success-title">응모 완료!</div>
+    <p class="success-desc">
+      3문제 모두 정답으로 응모가 완료되었습니다.<br>
+      선착순 100명 안에 드실 경우 입력하신 연락처로<br>
+      <strong style="color:var(--gold)">스타벅스 기프트콘(10,000원)</strong>을 발송해 드립니다. 🍀
+    </p>
+    <div class="result-badge">☕ 스타벅스 기프트콘 <strong style="font-size:16px;">응모 완료</strong></div>
+    <p style="font-size:12px;color:var(--silver);">*선착순 마감 시 지급이 어려울 수 있습니다. 양해 부탁드립니다.</p>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'quiz_entries';
+  const MAX_ENTRIES = 100;
+
+  const feedbacks = [
+    {
+      correct:'✅ 정답! 콜 옵션은 기초자산을 미리 정해진 행사가격으로 매수할 수 있는 권리입니다.',
+      wrong:'❌ 틀렸습니다. 콜 옵션은 기초자산을 정해진 가격에 "매수"할 수 있는 권리입니다. 매도할 수 있는 권리는 풋 옵션(Put Option)입니다.'
+    },
+    {
+      correct:'✅ 정답! 계좌 잔고가 유지증거금 이하로 떨어지면 브로커가 추가 증거금 납입을 요구합니다. 이를 마진콜이라 합니다.',
+      wrong:'❌ 틀렸습니다. 마진콜은 계좌의 증거금이 유지증거금 수준 아래로 내려갈 때 발생하며, 추가 증거금 납입 요구를 의미합니다.'
+    },
+    {
+      correct:'✅ 정답! KOSPI 200은 한국거래소(KRX)의 대표 주가지수로, 코스피200 선물·옵션 등 주가지수 파생상품의 기초자산으로 가장 널리 활용됩니다.',
+      wrong:'❌ 틀렸습니다. 한국 주가지수 파생상품의 대표 기초자산은 KOSPI 200입니다.'
+    }
+  ];
+
+  let answered = [false,false,false];
+  let scores = [0,0,0];
+  let answeredCount = 0;
+
+  // ── 스토리지 로드 ──
+  function loadEntries() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch(e) { return []; }
+  }
+
+  function saveEntries(entries) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); } catch(e) {}
+  }
+
+  function updateCounter() {
+    const entries = loadEntries();
+    const count = entries.length;
+    const remain = Math.max(0, MAX_ENTRIES - count);
+    document.getElementById('entryCount').textContent = count;
+    document.getElementById('remainText').textContent = remain > 0 ? `(잔여 ${remain}명)` : '(마감)';
+
+    if (count >= MAX_ENTRIES) {
+      document.getElementById('mainContent').style.display = 'none';
+      document.getElementById('closedScreen').style.display = 'block';
+    }
+  }
+
+  function selectAnswer(el) {
+    const optionsDiv = el.closest('.options');
+    const qIdx = parseInt(optionsDiv.dataset.q);
+    const correctIdx = parseInt(optionsDiv.dataset.answer);
+    const selectedIdx = parseInt(el.dataset.idx);
+    if (answered[qIdx]) return;
+    answered[qIdx] = true;
+    answeredCount++;
+    const allOptions = optionsDiv.querySelectorAll('.option');
+    allOptions.forEach(o => o.classList.add('disabled'));
+    const fb = document.getElementById('fb-'+qIdx);
+    const card = document.getElementById('card-'+qIdx);
+    if (selectedIdx === correctIdx) {
+      el.classList.add('selected-correct');
+      fb.className = 'feedback correct';
+      fb.textContent = feedbacks[qIdx].correct;
+      scores[qIdx] = 100;
+      card.classList.add('answered');
+    } else {
+      el.classList.add('selected-wrong');
+      allOptions[correctIdx].classList.add('reveal-correct');
+      fb.className = 'feedback wrong';
+      fb.textContent = feedbacks[qIdx].wrong;
+      scores[qIdx] = 0;
+      card.classList.add('answered');
+    }
+    updateProgress();
+    if (answeredCount === 3) {
+      const notice = document.getElementById('scoreNotice');
+      const total = scores.reduce((a,b)=>a+b,0);
+      document.getElementById('finalScore').textContent = total;
+      notice.style.display = 'block';
+      if (total === 300) {
+        document.getElementById('perfectMsg').style.display = 'inline';
+      } else {
+        document.getElementById('failMsg').style.display = 'inline';
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').textContent = '⚠️ 3문제 전체 정답자만 응모 가능합니다';
+      }
+      notice.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+  }
+
+  function updateProgress() {
+    document.getElementById('progressText').textContent = `진행 ${answeredCount} / 3 문제`;
+    document.getElementById('scoreText').textContent = `정답: ${scores.filter(s=>s>0).length} / 3`;
+    document.getElementById('progressFill').style.width = (answeredCount/3*100)+'%';
+  }
+
+  function submitEntry() {
+    const name = document.getElementById('inp-name').value.trim();
+    const phone = document.getElementById('inp-phone').value.trim();
+    const email = document.getElementById('inp-email').value.trim();
+    const agree = document.getElementById('agree').checked;
+    if (!name) { alert('이름을 입력해 주세요.'); return; }
+    if (!phone) { alert('연락처를 입력해 주세요.'); return; }
+    if (!email) { alert('이메일을 입력해 주세요.'); return; }
+    if (!agree) { alert('개인정보 수집 및 이용에 동의해 주세요.'); return; }
+
+    const entries = loadEntries();
+    if (entries.length >= MAX_ENTRIES) {
+      alert('아쉽게도 선착순이 마감되었습니다.');
+      updateCounter();
+      return;
+    }
+
+    // 중복 체크 (전화번호)
+    if (entries.some(e => e.phone === phone)) {
+      alert('이미 응모하신 연락처입니다.');
+      return;
+    }
+
+    const entry = {
+      no: entries.length + 1,
+      name, phone, email,
+      score: scores.reduce((a,b)=>a+b,0),
+      timestamp: new Date().toISOString(),
+      selected: entries.length < MAX_ENTRIES
+    };
+
+    entries.push(entry);
+    saveEntries(entries);
+    updateCounter();
+
+    document.getElementById('quizSection').style.display = 'none';
+    document.getElementById('entrySection').style.display = 'none';
+    document.querySelector('.prize-bar').style.display = 'none';
+    document.querySelector('.progress-wrap').style.display = 'none';
+    document.querySelector('.info-strip').style.display = 'none';
+    document.getElementById('counterBadge').closest('div').style.display = 'none';
+
+    const success = document.getElementById('successScreen');
+    success.style.display = 'block';
+    success.scrollIntoView({behavior:'smooth'});
+  }
+
+  // 초기 로드
+  updateCounter();
+</script>
+</body>
+</html>
